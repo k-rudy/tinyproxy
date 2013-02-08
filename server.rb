@@ -1,6 +1,7 @@
 require 'socket'
 require 'yaml'
 
+require_relative 'tiny_proxy/proxy'
 require_relative 'tiny_proxy/helpers'
 require_relative 'tiny_proxy/request'
 
@@ -18,7 +19,9 @@ loop do
   request = get_request_from_socket(socket)
   if request
     if supported_verb? request.verb
-      socket.puts ok
+      proxy = TinyProxy::Proxy.new(request)
+      response = proxy.serve!
+      binding.pry
     else
       socket.puts not_implemented
       socket.puts 'Request type is not supported'

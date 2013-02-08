@@ -3,7 +3,7 @@ require 'active_support'
 module TinyProxy
   class Request
 
-    attr_accessor :verb, :url, :options
+    attr_accessor :verb, :uri, :options
 
     class << self
 
@@ -19,15 +19,16 @@ module TinyProxy
       def for_data(data)
         puts data if SETTINGS['debug']
         tokens = data.split("\r\n")
-        verb, head = tokens[0].split(' / ')
+        verb, path, head = tokens[0].split(' ')
         if http? head
           options = tokens[1..-1].inject({}) do |hash, row|
             key, value = row.split(': ')
             hash[key] = value
             hash
           end
-          url = options.delete 'Host'
-          new(verb, url, options)
+          host = options.delete('Host')
+          uri = "http://#{host}#{path}"
+          new(verb, uri, options)
         end
       end
 
@@ -43,12 +44,12 @@ module TinyProxy
     # Initializer
     #
     # @param [String] verb - HTTP verb (GET, POST etc.)
-    # @param [String] url - url
+    # @param [String] uri - uri
     # @param [Hash] options - remaining http request options
     #
-    def initialize(verb, url, options)
+    def initialize(verb, uri, options)
       @verb = verb
-      @url = url
+      @uri = uri
       @options
     end
   end
