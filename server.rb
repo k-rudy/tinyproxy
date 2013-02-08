@@ -1,16 +1,15 @@
 require 'socket'
 require 'yaml'
 
+require_relative 'tiny_proxy/helpers'
 require_relative 'tiny_proxy/request'
 
 require 'pry'
 
+include TinyProxy::Helpers
+
 # General server settings
 SETTINGS = YAML.load_file("server.yml")
-
-def get_request_from_socket(socket)
-  TinyProxy::Request.for_data socket.recv(SETTINGS['request_max_length'])
-end
 
 server = TCPServer.new SETTINGS['port']
 loop do
@@ -18,10 +17,17 @@ loop do
   socket = server.accept
   request = get_request_from_socket(socket)
   if request
-
+    if supported_verb? request.verb
+      socket.puts ok
+    else
+      socket.puts not_implemented
+      socket.puts 'Request type is not supported'
+      puts 'Request type is not supported\n' if SETTINGS['debug']
+    end
+  else
+    puts 'Only HTTP requests are supported\n' if SETTINGS['debug']
   end
-    socket.puts "Hello !"
-    socket.puts "Time is #{Time.now}"
-    socket.close
+  socket.close
+
  # end
 end

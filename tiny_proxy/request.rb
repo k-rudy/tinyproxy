@@ -36,7 +36,7 @@ module TinyProxy
       # Checks whether the request is a http request
       #
       def http?(head)
-        head.start_with? 'HTTP'
+        head && head.start_with?('HTTP')
       end
     end
 
@@ -46,7 +46,7 @@ module TinyProxy
     # @param [String] url - url
     # @param [Hash] options - remaining http request options
     #
-    def initializer(verb, url, options)
+    def initialize(verb, url, options)
       @verb = verb
       @url = url
       @options
