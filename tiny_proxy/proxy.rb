@@ -29,8 +29,14 @@ module TinyProxy
     #
     # @return [TinyProxy::Response] wrapped response
     def serve_from_remote!
-      uri = URI(request.uri)
-      http_response = Net::HTTP.get_response(uri)
+      uri = URI.parse(request.uri)
+
+      req = Net::HTTP::Get.new(uri.path)
+      req.initialize_http_header(request.options)
+      http_response = Net::HTTP.new(uri.host, uri.port).start do |http|
+        http.request(req)
+      end
+
       response = wrap_response(http_response)
       if response.cacheable?
         # TODO: Add caching

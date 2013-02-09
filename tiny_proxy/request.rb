@@ -19,6 +19,7 @@ module TinyProxy
       def for_data(data)
         puts data if SETTINGS['debug']
         tokens = data.split("\r\n")
+
         verb, path, head = tokens[0].split(' ')
         if http? head
           # iterating through header rows starting from the second
@@ -29,7 +30,6 @@ module TinyProxy
           end
           host = options.delete('Host')
           uri = path#"http://#{host}#{path}"
-          #binding.pry
           new(verb, uri, options)
         end
       end

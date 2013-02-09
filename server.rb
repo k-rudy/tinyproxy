@@ -18,17 +18,11 @@ loop do
   #socket = server.accept
   request = get_request_from_socket(socket)
   if request
-    if supported_verb? request.verb
-      proxy = TinyProxy::Proxy.new(request)
-      response = proxy.serve!
-      socket.puts response
-    else
-      socket.puts not_implemented
-      socket.puts 'Request type is not supported'
-      puts 'Request type is not supported\n' if SETTINGS['debug']
-    end
+    proxy = TinyProxy::Proxy.new(request)
+    response = proxy.serve!
+    socket.puts response
   else
-    puts 'Only HTTP requests are supported\n' if SETTINGS['debug']
+    error 'Only GET http requests are supported' if SETTINGS['debug']
   end
   socket.close
 

@@ -1,13 +1,11 @@
+
 module TinyProxy
   # Some helper methods
   #
   module Helpers
     def get_request_from_socket(socket)
-      TinyProxy::Request.for_data socket.recv(SETTINGS['request_max_length'])
-    end
-
-    def supported_verb?(verb)
-      'GET' == verb
+      data = socket.recv(SETTINGS['request_max_length'])
+      TinyProxy::Request.for_data(data) if data && data.start_with?('GET')
     end
 
     def not_implemented
