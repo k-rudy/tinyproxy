@@ -1,46 +1,51 @@
 require 'net/http'
 
 require_relative 'cache'
+require_relative 'response'
 
 module TinyProxy
   class Proxy
 
-    attr_accessor :request, :cache
+    attr_accessor :request
 
     def initialize(request)
       @request = request
-      @cache = TinyProxy::Cache.new
     end
 
-    # Serves request
+    # Serves request either from cache or from remote location
+    #
     def serve!
-      if cache.has? request.uri
+      if TinyProxy::Cache.has? request.uri
         serve_from_cache!
       else
-        puts serve_from_remote! "http://tut.by"
+        serve_from_remote!
       end
     end
 
     private
 
-    def serve_from_remote!(url, limit=10)
-      uri = URI(url)
-      response = Net::HTTP.get_response(uri)
-      # You should choose a better exception.
-      raise ArgumentError, 'too many HTTP redirects' if limit == 0
-
-      case response
-      when Net::HTTPOK then
-        response
-        binding.pry
-      when Net::HTTPRedirection then
-        location = response['location']
-        warn "redirected to #{location}"
-        serve_from_remote!(location, limit - 1)
-      else
-        response.value
-        binding.pry
+    # Performs HTTP request
+    # If the response is cacheable then adds it to the cache
+    #
+    # @return [TinyProxy::Response] wrapped response
+    def serve_from_remote!
+      uri = URI(request.uri)
+      http_response = Net::HTTP.get_response(uri)
+      response = wrap_response(http_response)
+      if response.cacheable?
+        # TODO: Add caching
       end
+      response
+    end
+
+    def serve_from_cache
+      #TODO: implement retrieval from cache logic
+    end
+
+    # Wraps HTTPResponse with TinyProxy::Response
+    #
+    def wrap_response(response)
+      TinyProxy::Response.new response
     end
   end
 end

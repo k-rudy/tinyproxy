@@ -3,3 +3,10 @@ port: 2000                      # proxy port, assuming is running on localhost
 debug: true                     # if running in debug mode server will be printing debug info
 
 request_max_length: 8192        # request maximum size that is read from TCP socket
+
+cacheable_statuses:             # http statuses to cache
+  - '200'
+  - '301'
+  - '302'
+cacheable_types:                # mime types to cache
+  - 'text/html'

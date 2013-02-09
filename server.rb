@@ -14,14 +14,14 @@ SETTINGS = YAML.load_file("server.yml")
 
 server = TCPServer.new SETTINGS['port']
 loop do
-  #Thread.start(server.accept) do |client|
-  socket = server.accept
+  Thread.start(server.accept) do |socket|
+  #socket = server.accept
   request = get_request_from_socket(socket)
   if request
     if supported_verb? request.verb
       proxy = TinyProxy::Proxy.new(request)
       response = proxy.serve!
-      binding.pry
+      socket.puts response
     else
       socket.puts not_implemented
       socket.puts 'Request type is not supported'
@@ -32,5 +32,5 @@ loop do
   end
   socket.close
 
- # end
+ end
 end

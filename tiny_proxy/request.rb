@@ -21,13 +21,15 @@ module TinyProxy
         tokens = data.split("\r\n")
         verb, path, head = tokens[0].split(' ')
         if http? head
+          # iterating through header rows starting from the second
           options = tokens[1..-1].inject({}) do |hash, row|
             key, value = row.split(': ')
             hash[key] = value
             hash
           end
           host = options.delete('Host')
-          uri = "http://#{host}#{path}"
+          uri = path#"http://#{host}#{path}"
+          #binding.pry
           new(verb, uri, options)
         end
       end

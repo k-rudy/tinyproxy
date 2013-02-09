@@ -1,11 +1,14 @@
 module TinyProxy
   class Cache
-    def has?(uri)
-      false
-    end
+    class << self
 
-    def add(request, response)
-      #TODO
+      def has?(uri)
+        false
+      end
+
+      def add(request, response)
+        #TODO
+      end
     end
   end
 end
