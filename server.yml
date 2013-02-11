@@ -10,3 +10,6 @@ cacheable_statuses:             # http statuses to cache
   - '302'
 cacheable_types:                # mime types to cache
   - 'text/html'
+  - 'text/css'
+
+cache_limit: 5                  # cache limit in megabytes

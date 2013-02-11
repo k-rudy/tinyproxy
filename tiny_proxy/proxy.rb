@@ -39,19 +39,26 @@ module TinyProxy
 
       response = wrap_response(http_response)
       if response.cacheable?
-        # TODO: Add caching
+        puts "\nCaching '#{request.uri}'" if SETTINGS['debug']
+        TinyProxy::Cache.add(request.uri, response)
       end
       response
     end
 
+    # Gets the cached response
+    #
     def serve_from_cache
-      #TODO: implement retrieval from cache logic
+      puts "Served from cache '#{request.uri}'" if SETTINGS ['debug']
+      TinyProxy::Cache.get(request.uri)
     end
 
     # Wraps HTTPResponse with TinyProxy::Response
     #
     def wrap_response(response)
-      TinyProxy::Response.new response
+      TinyProxy::Response.new(response.to_hash,
+                              response.body,
+                              response.code,
+                              response.msg)
     end
   end
 end

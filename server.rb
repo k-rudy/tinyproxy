@@ -22,7 +22,7 @@ loop do
     response = proxy.serve!
     socket.puts response
   else
-    error 'Only GET http requests are supported' if SETTINGS['debug']
+    puts 'Only GET http requests are supported' if SETTINGS['debug']
   end
   socket.close
 
