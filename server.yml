@@ -12,6 +12,7 @@ cacheable_types:                # mime types to cache
   - 'text/html'
   - 'text/css'
   - 'application/javascript'
-cache_limit: 0.2                # cache limit in megabytes
+
+cache_limit: 5                  # cache limit in megabytes
 
 http_timeout: 20                # timeout value

@@ -1,4 +1,4 @@
-require 'objspace'
+require_relative 'space'
 
 module TinyProxy
   # Implements proxy server cache.
@@ -19,8 +19,12 @@ module TinyProxy
   #    requests because several minutes of intensive surfing will fill
   #    the cache
   #
+  # Cache size is evaluated with certain approximation
+  #
   class Cache
     class << self
+
+      include Space
 
       attr_accessor :headers, :bodies, :uri_history, :size
 
@@ -50,13 +54,13 @@ module TinyProxy
 
         # Adding structures to cache
         headers[uri] = header
-        save_body(digest, body)
+        save_body(response.digest, body)
         uri_history << uri
 
-        # Updating cache space
+        # Updating cache size
         @size = size + needed_space
 
-        puts "Cache space: #{space}. Available: #{space_remaining}\n\n" if ::SETTINGS['debug']
+        puts "Cache size: #{size}. Available: #{space_remaining}\n\n" if ::SETTINGS['debug']
       end
 
       # Retrieves cached request by URI
@@ -70,10 +74,10 @@ module TinyProxy
 
       private
 
-      # Memory used for cache
+      # Memory used for cache in bytes
       #
-      def space
-        @space ||= 0
+      def size
+        @size ||= 0
       end
 
       # Stores response headers and response body digest
@@ -100,7 +104,7 @@ module TinyProxy
 
       # If body is new - add it, otherwise increment headers counter
       #
-      def save_response(digest, body)
+      def save_body(digest, body)
         if bodies[digest].nil?
           bodies[digest] = body
         else
@@ -132,7 +136,7 @@ module TinyProxy
       #
       # @return [int] needed space in bytes
       def ensure_space(uri, header, body)
-        allocate(cache_entry_size)
+        allocate(cache_entry_size(uri, header, body))
       end
 
       # Allocates needed space to store the request in cache
@@ -145,17 +149,11 @@ module TinyProxy
         space
       end
 
-      # Calculates cache space required to store given arguments
-      #
-      def space_needed_for(*args)
-        args.inject(0) { |sum, arg| sum += ObjectSpace.memsize_of(arg) }
-      end
-
       # Gets the remaining space in cache
       #
       # @return [int] number of bytes remaining
       def space_remaining
-        ::SETTINGS['cache_limit'] * BYTES_IN_MEGABYTE - space
+        ::SETTINGS['cache_limit'] * BYTES_IN_MEGABYTE - size
       end
 
       # Removes first added element from the cache and sets the cache
@@ -163,29 +161,44 @@ module TinyProxy
       #
       def cleanup
         uri = uri_history.shift
+
+        puts "Removing '#{uri}' from cache" if ::SETTINGS['debug']
+
         header = headers.delete(uri)
         digest = header.digest
+
         # if there were several headers with the same body we shouldn't
         # delete the body, but decrement headers counter
         if bodies[digest].headers_count > 1
+          puts 'Cache body is used by other requests. Decrementing counter' if ::SETTINGS['debug']
+          bodies[digest].headers_count -= 1
           allocated_space = cache_entry_size(uri, header)
         else
+          body = bodies.delete(digest)
           allocated_space = cache_entry_size(uri, header, body)
         end
-        size -= allocated_space
+        @size = size - allocated_space
         puts "Allocated space: #{allocated_space}" if ::SETTINGS['debug']
       end
     end
   end
 
+  # Cached header structure
+  #
   class CachedHeader < Struct.new(:header, :code, :msg, :digest)
+    include Space
+
     # Header size in bytes
     def size
       space_needed_for(header, code, msg, digest)
     end
   end
 
+  # Cached body structure
+  #
   class CachedBody < Struct.new(:body, :headers_count)
+    include Space
+
     # Body size in bytes
     def size
       space_needed_for(body, headers_count)

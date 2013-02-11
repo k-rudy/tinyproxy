@@ -44,6 +44,10 @@ module TinyProxy
         TinyProxy::Cache.add(request.uri, response)
       end
       response
+    rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, SocketError,
+      Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
+      puts "NetHTTP Error occured"
+      error_response(e.message)
     end
 
     # Gets the cached response
@@ -60,6 +64,12 @@ module TinyProxy
                               response.body,
                               response.code,
                               response.msg)
+    end
+
+    # Error response
+    #
+    def error_response(message)
+      TinyProxy::Response.new({}, message, '500', 'Internal Server Error')
     end
   end
 end
