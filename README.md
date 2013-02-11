@@ -18,7 +18,7 @@ The following settings can be configured through `settings.yml`:
 1. Proxy server port
 2. Cache limit
 3. Cacheable statuses
-4.) Cacheable content types
+4. Cacheable content types
 
 and some other minor options
 
