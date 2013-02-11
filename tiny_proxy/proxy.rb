@@ -34,12 +34,13 @@ module TinyProxy
       req = Net::HTTP::Get.new(uri.path)
       req.initialize_http_header(request.options)
       http_response = Net::HTTP.new(uri.host, uri.port).start do |http|
+        http.open_timeout = http.read_timeout = ::SETTINGS['http_timeout']
         http.request(req)
       end
 
       response = wrap_response(http_response)
       if response.cacheable?
-        puts "\nCaching '#{request.uri}'" if SETTINGS['debug']
+        puts "\nCaching '#{request.uri}'" if ::SETTINGS['debug']
         TinyProxy::Cache.add(request.uri, response)
       end
       response
@@ -47,8 +48,8 @@ module TinyProxy
 
     # Gets the cached response
     #
-    def serve_from_cache
-      puts "Served from cache '#{request.uri}'" if SETTINGS ['debug']
+    def serve_from_cache!
+      puts "\nServed from cache '#{request.uri}'\n\n" if ::SETTINGS['debug']
       TinyProxy::Cache.get(request.uri)
     end
 

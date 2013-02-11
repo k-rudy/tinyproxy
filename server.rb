@@ -14,8 +14,8 @@ SETTINGS = YAML.load_file("server.yml")
 
 server = TCPServer.new SETTINGS['port']
 loop do
-  Thread.start(server.accept) do |socket|
-  #socket = server.accept
+  #Thread.start(server.accept) do |socket|
+  socket = server.accept
   request = get_request_from_socket(socket)
   if request
     proxy = TinyProxy::Proxy.new(request)
@@ -25,6 +25,5 @@ loop do
     puts 'Only GET http requests are supported' if SETTINGS['debug']
   end
   socket.close
-
- end
+ #end
 end

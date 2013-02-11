@@ -17,10 +17,9 @@ module TinyProxy
       # @return [nil, Request] - if this sis a valid http request then
       #   it requrns instantiated request object, nil - otherwise
       def for_data(data)
-        puts data if SETTINGS['debug']
         tokens = data.split("\r\n")
-
         verb, path, head = tokens[0].split(' ')
+        puts "#{verb} #{path}" if SETTINGS['debug']
         if http? head
           # iterating through header rows starting from the second
           options = tokens[1..-1].inject({}) do |hash, row|
