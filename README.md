@@ -31,6 +31,6 @@ Known issues
 ------------
 
 Has encoding issue for some websites. Unportunately don't have time to
-investigate and fix that
+investigate and fix that.
 
 Have fun!
