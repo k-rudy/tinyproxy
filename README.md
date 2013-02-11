@@ -15,6 +15,7 @@ to localhost at 2000 port
 Configuration
 -------------
 The following settings can be configured through `settings.yml`:
+
 1. Proxy server port
 2. Cache limit
 3. Cacheable statuses
