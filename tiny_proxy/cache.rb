@@ -22,11 +22,9 @@ module TinyProxy
   # Cache size is evaluated with certain approximation
   #
   class Cache
+
     class << self
-
       include Space
-
-      attr_accessor :headers, :bodies, :uri_history, :size
 
       # Sinse Rails .megabytes helper is not available we need to
       # define it
@@ -101,6 +99,8 @@ module TinyProxy
       def uri_history
         @uri_history ||= []
       end
+
+      private
 
       # If body is new - add it, otherwise increment headers counter
       #
